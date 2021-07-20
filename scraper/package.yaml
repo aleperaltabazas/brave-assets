@@ -22,6 +22,7 @@ description: Please see the README on GitHub at <https://github.com/githubuser/b
 dependencies:
     - aeson <= 1.4.7.1
     - aeson-casing <= 0.2.0.0
+    - async <= 2.2.3
     - base >= 4.7 && < 5
     - bytestring <= 0.10.10.1
     - containers <= 0.6.4.1
@@ -33,6 +34,7 @@ dependencies:
     - regex-posix <= 0.96.0.0
     - req <= 3.9.0
     - scalpel <= 0.6.2
+    - split <= 0.2.3.4
     - string-interpolate <= 0.2.1.0
     - text <= 1.2.4.0
     - text-conversions <= 0.3.1

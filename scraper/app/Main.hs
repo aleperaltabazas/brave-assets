@@ -4,9 +4,11 @@
 
 module Main where
 
+import Control.Concurrent.Async
 import Control.Monad (unless, forM_, void, when)
 import Data.Char (toLower)
 import qualified Data.Deathmax as Deathmax
+import Data.List.Split
 import qualified Data.Map as Map
 import Data.Maybe
 import Data.String.Interpolate (i)
@@ -40,7 +42,7 @@ main = do
   putStrLn "Finished fetching units. Scraping images..."
   when refresh $ removePathForcibly dumpPath
   createDirectoryIfMissing False "assets"
-  forM_ (Map.toList units) $ \(id, unit) -> do
+  forM_ (chunksOf 5 . Map.toList $ units) $ mapConcurrently_ $ \(id, unit) -> do
     exists <- doesFileExist (fileName unit)
     unless exists $ do
       putStrLn [i|Scraping #{Deathmax.name unit}|]
