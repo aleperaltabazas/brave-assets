@@ -1,0 +1,104 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           brave-assets
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/brave-assets#readme>
+homepage:       https://github.com/githubuser/brave-assets#readme
+bug-reports:    https://github.com/githubuser/brave-assets/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2021 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/brave-assets
+
+library
+  exposed-modules:
+      Data.Deathmax
+      Network.Github.Deathmax
+      Network.Wiki.BraveFrontier
+  other-modules:
+      Paths_brave_assets
+  hs-source-dirs:
+      src
+  build-depends:
+      aeson <=1.4.7.1
+    , aeson-casing <=0.2.0.0
+    , base >=4.7 && <5
+    , bytestring <=0.10.10.1
+    , containers <=0.6.4.1
+    , directory <=1.3.6.0
+    , optparse-applicative <=0.15.1.0
+    , process <=1.6.9.0
+    , regex-base <=0.94.0.0
+    , regex-posix <=0.96.0.0
+    , req <=3.9.0
+    , scalpel <=0.6.2
+    , string-interpolate <=0.2.1.0
+    , text <=1.2.4.0
+    , text-conversions <=0.3.1
+  default-language: Haskell2010
+
+executable brave-assets-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_brave_assets
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson <=1.4.7.1
+    , aeson-casing <=0.2.0.0
+    , base >=4.7 && <5
+    , brave-assets
+    , bytestring <=0.10.10.1
+    , containers <=0.6.4.1
+    , directory <=1.3.6.0
+    , optparse-applicative <=0.15.1.0
+    , process <=1.6.9.0
+    , regex-base <=0.94.0.0
+    , regex-posix <=0.96.0.0
+    , req <=3.9.0
+    , scalpel <=0.6.2
+    , string-interpolate <=0.2.1.0
+    , text <=1.2.4.0
+    , text-conversions <=0.3.1
+  default-language: Haskell2010
+
+test-suite brave-assets-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_brave_assets
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson <=1.4.7.1
+    , aeson-casing <=0.2.0.0
+    , base >=4.7 && <5
+    , brave-assets
+    , bytestring <=0.10.10.1
+    , containers <=0.6.4.1
+    , directory <=1.3.6.0
+    , optparse-applicative <=0.15.1.0
+    , process <=1.6.9.0
+    , regex-base <=0.94.0.0
+    , regex-posix <=0.96.0.0
+    , req <=3.9.0
+    , scalpel <=0.6.2
+    , string-interpolate <=0.2.1.0
+    , text <=1.2.4.0
+    , text-conversions <=0.3.1
+  default-language: Haskell2010
