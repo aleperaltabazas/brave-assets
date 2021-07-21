@@ -5,6 +5,7 @@
 module Main where
 
 import Control.Concurrent.Async
+import Control.Exception
 import Control.Monad (unless, forM_, void, when)
 import Data.Char (toLower)
 import qualified Data.Deathmax as Deathmax
@@ -31,8 +32,9 @@ optionsParser = do
   refresh  <- refreshParser
   return ProgramOptions { .. }
  where
-  dumpPathParser = optional $ strOption (long "dump-path" <> short 'd' <> metavar "PATH" <> help "Path where to dump images")
-  refreshParser  = switch (long "refresh" <> short 'r' <> help "Redownload all images")
+  dumpPathParser =
+    optional $ strOption (long "dump-path" <> short 'd' <> metavar "PATH" <> help "Path where to dump images. Default is assets/")
+  refreshParser = switch (long "refresh" <> short 'r' <> help "Redownload all images. Deactivated by default")
 
 main :: IO ()
 main = do
@@ -45,16 +47,27 @@ main = do
   forM_ (chunksOf 5 . Map.toList $ units) $ mapConcurrently_ $ \(id, unit) -> do
     exists <- doesFileExist (fileName unit)
     unless exists $ do
-      putStrLn [i|Scraping #{Deathmax.name unit}|]
-      imgUrl <- Wiki.scrapeUnitImage (Deathmax.name unit) id
-      case imgUrl of
-        Nothing  -> putStrLn [i|No image for unit #{Deathmax.name unit}|]
-        Just url -> do
-          let latest = reverse . dropWhile (/= '/') . tail . dropWhile (/= '/') . reverse $ url
-          void $ readCreateProcessWithExitCode (shell [i|curl #{latest} -o assets/#{fileName unit}|]) ""
- where
-  fileName :: Deathmax.Unit -> String
-  fileName unit = (++ ".png") . map toLower . replace ' ' "-" . fromText . Deathmax.name $ unit
+      e <- trySome $ do
+        imgUrl <- Wiki.scrapeUnitImage (Deathmax.name unit) id
+        case imgUrl of
+          Nothing  -> putStrLn [i|No image for unit #{Deathmax.name unit}|]
+          Just url -> do
+            putStrLn [i|Downloading image for #{Deathmax.name unit}|]
+            let latest = reverse . dropWhile (/= '/') . tail . dropWhile (/= '/') . reverse $ url
+            void $ readCreateProcessWithExitCode (shell [i|curl #{latest} -o #{fileName unit}|]) ""
+      case e of
+        Left err -> do
+          putStrLn [i|Failed to download #{Deathmax.name unit}|]
+          print err
+        Right _ -> return ()
 
-  replace :: Char -> String -> String -> String
-  replace look rep = concatMap (\c -> if c == look then rep else [c])
+ where
+  trySome :: IO a -> IO (Either SomeException a)
+  trySome = try
+
+fileName :: Deathmax.Unit -> String
+fileName =
+  ("assets/" ++) . (++ ".png") . replace '\'' "" . replace '&' "and" . map toLower . replace ' ' "-" . fromText . Deathmax.name
+
+replace :: Char -> String -> String -> String
+replace look rep = concatMap (\c -> if c == look then rep else [c])
