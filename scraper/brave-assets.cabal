@@ -25,8 +25,7 @@ source-repository head
 
 library
   exposed-modules:
-      Data.Deathmax
-      Network.Github.Deathmax
+      Data.Unit
       Network.Wiki.BraveFrontier
   other-modules:
       Paths_brave_assets
