@@ -44,9 +44,9 @@ scrapeUnit name = scrapeURL [i|#{page}/#{name}|] unit
     ("div" @: [hasClass "unit-gallery", hasClass "unit-box"])
     (  chroot ("div" @: [hasClass "tabber", hasClass "wds-tabber"])
     $  chroots ("div" @: [hasClass "wds-tab__content"])
-    $  attr "src"
-    $  "img"
-    @: [match isFullArtImage]
+    $  chroot "center"
+    $  attr "href"
+    $  "a"
     )
 
   isFullArtImage attr value = attr == "alt" && "Unit ills full" `isPrefixOf` value
