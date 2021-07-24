@@ -1,16 +1,16 @@
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Data.Unit where
 
-import Data.Aeson
-import Data.Text
-import GHC.Generics
+import Data.Text (Text, intercalate)
 
 data Unit
   = Unit
-  { name :: String
-  , rarity :: String
-  , arts :: [String]
-  } deriving (Show, Eq, Generic)
+  { name :: Text
+  , rarity :: Text
+  , arts :: [Text]
+  } deriving (Show, Eq)
 
-instance ToJSON Unit
+toCsvLine :: Unit -> Text
+toCsvLine Unit {..} = intercalate ";" [name, rarity, "[" <> intercalate "," arts <> "]" <> "\n"]

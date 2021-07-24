@@ -4,52 +4,59 @@
 
 module Network.Wiki.BraveFrontier where
 
-import Data.Char (isDigit)
-import Data.List (isPrefixOf)
+
+import Data.Char
 import Data.String.Interpolate (i)
-import Data.Text (Text)
+import Data.Text (Text, replace)
 import qualified Data.Text as Text
-import Data.Unit
+import Data.Unit (Unit(..))
 import Text.HTML.Scalpel
 
 page :: String
 page = "https://bravefrontierglobal.fandom.com/wiki"
 
-scrapeUnitImage :: Text -> Text -> IO (Maybe String)
-scrapeUnitImage unitName id = scrapeURL [i|#{page}/#{unitName}|] unitImage
- where
-  unitImage :: Scraper String String
-  unitImage = attr "src" $ "img" @: ["alt" @= [i|Unit ills full #{id}.png|]]
+star :: Text
+star = "★"
 
-scrapeUnitList :: Maybe String -> IO (Maybe [String])
+escapedStar :: Text
+escapedStar = "\226\152\133"
+
+scrapeUnitList :: Maybe String -> IO (Maybe [Text])
 scrapeUnitList list = scrapeURL [i|#{page}/Unit_List#{maybe "" (":" ++) list}|] unitList
+
  where
   unitList = tail <$> chroot ("table" @: [hasClass "wikitable"]) (chroot "tbody" $ chroots "tr" unitName)
 
-  unitName = chroot "td" (attr "title" "a")
+  unitName = do
+    s <- chroot "td" (attr "title" "a")
+    return $ replace escapedStar star s
 
-scrapeUnit :: String -> IO (Maybe Unit)
-scrapeUnit name = scrapeURL [i|#{page}/#{name}|] unit
+scrapeUnit :: Text -> IO (Maybe Unit)
+scrapeUnit name = do
+  s <- scrapeURL [i|#{page}/#{name}|] unit
+  return $! s
  where
-  unit :: Scraper String Unit
+  unit :: Scraper Text Unit
   unit = do
     rarity <- scrapeRarity
     arts   <- scrapeArts
     return Unit { .. }
 
-  scrapeRarity = takeWhile isDigit . (!! 2) <$> chroot
+  scrapeRarity = rectifyRarity . (!! 2) <$> chroot
     ("div" @: [hasClass "unit-info", hasClass "unit-box"])
     (chroot (("table" @: [hasClass "article-table", hasClass "tight"]) // "tbody") $ chroots "tr" $ chroot "td" (text "a"))
+
   scrapeArts = map trimUrl <$> chroot
     ("div" @: [hasClass "unit-gallery", hasClass "unit-box"])
-    (  chroot ("div" @: [hasClass "tabber", hasClass "wds-tabber"])
-    $  chroots ("div" @: [hasClass "wds-tab__content"])
-    $  chroot "center"
-    $  attr "href"
-    $  "a"
+    ( chroot ("div" @: [hasClass "tabber", hasClass "wds-tabber"])
+    $ chroots ("div" @: [hasClass "wds-tab__content"])
+    $ chroot "center"
+    $ attr "href" "a"
     )
 
-  isFullArtImage attr value = attr == "alt" && "Unit ills full" `isPrefixOf` value
+  trimUrl = Text.reverse . Text.dropWhile (/= '/') . Text.tail . Text.dropWhile (/= '/') . Text.reverse
 
-  trimUrl = reverse . dropWhile (/= '/') . tail . dropWhile (/= '/') . reverse
-
+  rectifyRarity t
+    | Text.null t           = "Omni"
+    | isDigit $ Text.head t = Text.take 1 t <> star
+    | otherwise             = t
